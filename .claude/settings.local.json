@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude plugin:*)",
+      "Bash(tail:*)",
+      "Bash(/Users/eyal.levy/dev/git/elevy30/nebius/.venv/bin/python:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(timeout 5 .venv/bin/uvicorn app.main:app:*)",
+      "Bash(arch:*)",
+      "Bash(sleep 1:*)",
+      "Bash(pgrep:*)",
+      "Bash(curl:*)",
+      "Bash(lsof -ti:8000 | xargs kill -9 2>/dev/null)",
+      "Bash(pkill:*)"
+    ]
+  }
+}
