@@ -12,6 +12,7 @@ dependencies = [
     "uvicorn>=0.34.0",
     "httpx>=0.28.0",
     "openai>=1.0.0",
+    "pytest (>=9.0.2,<10.0.0)",
 ]
 
 [tool.poetry]
