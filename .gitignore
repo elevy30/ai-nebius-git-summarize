@@ -1,0 +1,5 @@
+/.env
+/.claude/cc10x/patterns.md
+/poetry.lock
+/.idea/*
+
