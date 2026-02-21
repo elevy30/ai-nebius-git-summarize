@@ -1,6 +1,6 @@
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
-from app.main import app
+from main import app
 from app.services.github_client import RepoData
 
 client = TestClient(app)

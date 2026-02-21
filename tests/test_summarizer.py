@@ -1,7 +1,7 @@
 import pytest
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
-from app.services.summarizer import Summarizer, SummarizerError
+from app.services.llm_summarizer import Summarizer, SummarizerError
 from app.services.github_client import RepoData
 
 

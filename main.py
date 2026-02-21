@@ -1,12 +1,12 @@
 import os
 from pathlib import Path
 from fastapi import FastAPI
-from app.routers import summarize
+from app.routers import health, summarize
 
 
 def _load_dotenv():
     """Load .env file if it exists (lightweight, no extra dependency)."""
-    env_path = Path(__file__).resolve().parent.parent / ".env"
+    env_path = Path(__file__).resolve().parent / ".env"
     if env_path.exists():
         with open(env_path) as f:
             for line in f:
@@ -24,9 +24,9 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(health.router)
 app.include_router(summarize.router)
 
-
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

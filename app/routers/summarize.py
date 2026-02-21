@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from app.models import SummarizeRequest, SummarizeResponse, ErrorResponse
 from app.services.github_client import GitHubClient, GitHubClientError
-from app.services.summarizer import Summarizer, SummarizerError
+from app.services.llm_summarizer import Summarizer, SummarizerError
 
 router = APIRouter()
 

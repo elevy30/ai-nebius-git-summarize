@@ -12,39 +12,27 @@ summary including a description, technologies used, and project structure analys
 
 ### Step-by-step setup
 
-1. Create and activate a virtual environment:
+
+
+1. Install dependencies:
 
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # Linux/macOS
-   # or: .venv\Scripts\activate  # Windows
+    poetry install --no-root
    ```
 
-2. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Set your OpenAI API key as an environment variable:
+2. Set your OpenAI API key as an environment variable:
 
    ```bash
    export OPENAI_API_KEY=sk-your-key-here
    ```
 
-   Alternatively, create a `.env` file in the project root:
-
-   ```
-   OPENAI_API_KEY=sk-your-key-here
-   ```
-
-4. Start the server:
+3. Start the server:
 
    ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000
+   poetry run python main.py
    ```
 
-5. Test it:
+4. Test it:
 
    ```bash
    curl -X POST http://localhost:8000/summarize \
