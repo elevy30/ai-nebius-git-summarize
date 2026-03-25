@@ -1,3 +1,3 @@
-# LLM Architecture - ארכיטקטורת LLM
+# AI Product - מוצר AI
 
-Module 3 of the Nebius AI Course.
+Module 2 of the Nebius AI Course.
