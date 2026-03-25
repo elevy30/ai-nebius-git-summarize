@@ -7,5 +7,4 @@
 .DS_Store
 
 *.mp4
-
-#ignore all mp4 files except the one below
+**/*.mp4
