@@ -8,5 +8,4 @@
 
 *.mp4
 
-
-#ignore all mp4 files
+#ignore all mp4 files except the one below
