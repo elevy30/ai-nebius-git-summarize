@@ -5,3 +5,8 @@
 
 **/__pycache__
 .DS_Store
+
+*.mp4
+
+
+#ignore all mp4 files
