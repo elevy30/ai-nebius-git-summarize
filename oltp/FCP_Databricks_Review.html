@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCP — Databricks Fit Review</title>
+<style>
+  :root {
+    --bg: #0f1923;
+    --card: #1a2a3a;
+    --card-hover: #1f3348;
+    --accent: #00d4aa;
+    --accent2: #ff6b6b;
+    --accent3: #ffa94d;
+    --text: #e0e6ed;
+    --text-muted: #8899aa;
+    --border: #2a3f55;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+  .hero {
+    background: linear-gradient(135deg, #0a1628 0%, #1a2a3a 50%, #0d2137 100%);
+    padding: 80px 60px; border-bottom: 3px solid #6495ed;
+  }
+  .hero h1 { font-size: 2.8em; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .hero .subtitle { font-size: 1.2em; color: #6495ed; }
+  .hero .meta { margin-top: 20px; color: var(--text-muted); font-size: 0.9em; }
+  .nav-links { display: flex; gap: 16px; margin-top: 30px; flex-wrap: wrap; }
+  .nav-links a {
+    background: var(--card); color: var(--accent); text-decoration: none;
+    padding: 12px 24px; border-radius: 8px; border: 1px solid var(--border);
+    font-weight: 600; transition: all 0.2s;
+  }
+  .nav-links a:hover { background: var(--accent); color: var(--bg); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 60px; }
+
+  .tension-box {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(100, 149, 237, 0.08));
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 30px 36px; margin-bottom: 50px;
+  }
+  .tension-box h2 { color: #fff; font-size: 1.5em; margin-bottom: 14px; }
+  .tension-box strong { color: #fff; }
+
+  .zone-title {
+    font-size: 1.6em; font-weight: 700; padding: 14px 24px;
+    border-radius: 10px; margin: 50px 0 24px 0; display: inline-block;
+  }
+  .zone-title.best { background: rgba(0, 212, 170, 0.15); color: var(--accent); }
+  .zone-title.stretched { background: rgba(255, 169, 77, 0.15); color: var(--accent3); }
+  .zone-title.wrong { background: rgba(255, 107, 107, 0.15); color: var(--accent2); }
+
+  .item-card {
+    background: var(--card); border-radius: 12px; padding: 28px 32px;
+    margin-bottom: 20px; transition: background 0.2s;
+  }
+  .item-card:hover { background: var(--card-hover); }
+  .item-card h3 { font-size: 1.2em; color: #fff; margin-bottom: 6px; }
+  .item-card .confidence {
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: 0.8em; font-weight: 700; margin-bottom: 14px;
+  }
+  .conf-10 { background: rgba(0, 212, 170, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .conf-9 { background: rgba(0, 212, 170, 0.15); color: var(--accent); border: 1px solid rgba(0, 212, 170, 0.5); }
+  .conf-8 { background: rgba(0, 212, 170, 0.1); color: var(--accent); border: 1px solid rgba(0, 212, 170, 0.3); }
+  .conf-6 { background: rgba(255, 169, 77, 0.15); color: var(--accent3); border: 1px solid rgba(255, 169, 77, 0.4); }
+  .conf-5 { background: rgba(255, 169, 77, 0.2); color: var(--accent3); border: 1px solid var(--accent3); }
+  .conf-3 { background: rgba(255, 107, 107, 0.15); color: var(--accent2); border: 1px solid rgba(255, 107, 107, 0.4); }
+  .conf-2 { background: rgba(255, 107, 107, 0.2); color: var(--accent2); border: 1px solid var(--accent2); }
+
+  .item-card p { margin-bottom: 10px; }
+  .item-card strong { color: #fff; }
+  .item-card ul { padding-left: 20px; margin: 10px 0; }
+  .item-card li { margin-bottom: 6px; }
+  .item-card code {
+    background: rgba(0, 212, 170, 0.1); padding: 2px 8px; border-radius: 4px;
+    font-family: 'Consolas', monospace; font-size: 0.9em; color: var(--accent);
+  }
+
+  .take {
+    background: rgba(100, 149, 237, 0.08); border: 1px solid rgba(100, 149, 237, 0.25);
+    border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+  }
+  .take strong { color: #6495ed; }
+
+  .warn-box {
+    background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.25);
+    border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+  }
+
+  /* Architecture recommendation */
+  .arch-rec {
+    background: var(--card); border-radius: 16px; padding: 36px; margin: 50px 0;
+    border: 2px solid #6495ed;
+  }
+  .arch-rec h2 { color: #fff; font-size: 1.5em; margin-bottom: 24px; }
+  .arch-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .arch-col { border-radius: 12px; padding: 24px; }
+  .arch-col.keep {
+    background: rgba(0, 212, 170, 0.06); border: 1px solid rgba(0, 212, 170, 0.2);
+  }
+  .arch-col.move {
+    background: rgba(255, 107, 107, 0.06); border: 1px solid rgba(255, 107, 107, 0.2);
+  }
+  .arch-col h3 { margin-bottom: 14px; font-size: 1.1em; }
+  .arch-col.keep h3 { color: var(--accent); }
+  .arch-col.move h3 { color: var(--accent2); }
+  .arch-col ul { padding-left: 20px; }
+  .arch-col li { margin-bottom: 8px; font-size: 0.95em; }
+
+  .bottom-line {
+    background: linear-gradient(135deg, #1a2a3a, #0d2137);
+    border: 2px solid #6495ed; border-radius: 16px;
+    padding: 40px; margin: 40px 0 60px 0;
+  }
+  .bottom-line h2 { font-size: 1.6em; color: #fff; margin-bottom: 16px; }
+  .bottom-line p { margin-bottom: 14px; }
+  .bottom-line strong { color: #fff; }
+  .bottom-line .key-msg {
+    color: #6495ed; font-weight: 600; font-size: 1.05em;
+    margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 900px) {
+    .arch-cols { grid-template-columns: 1fr; }
+    .hero, .container { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Databricks Fit Review</h1>
+  <div class="subtitle">Where Databricks is the right tool, where it's stretched, and where it's wrong</div>
+  <div class="meta">GoTyme Bank / GoTymeX &middot; FCP Architecture &middot; March 2026</div>
+  <div class="nav-links">
+    <a href="FCP_Architecture_Evaluation.html">Gaps & Risks</a>
+    <a href="FCP_Architecture_Flow_Diagram.html">Flow Diagrams & Latency</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tension-box">
+    <h2>The Core Tension</h2>
+    <p>The FCP deck makes a bold claim: <strong>everything runs on Databricks</strong>. That's the shift-left pitch. But Databricks is fundamentally an <strong>analytics and ML platform</strong> that recently added OLTP capabilities (Lakebase). The FCP is asking it to also be a <strong>real-time transaction processing system, a workflow engine backend, and an application database</strong> &mdash; simultaneously.</p>
+  </div>
+
+  <!-- BEST CHOICE -->
+  <div class="zone-title best">Where Databricks is GENUINELY the Best Choice</div>
+
+  <div class="item-card">
+    <h3>1. The Gold Layer &mdash; Analytics, Regulatory Reporting, Audit</h3>
+    <div class="confidence conf-10">Confidence: 10/10</div>
+    <p>This is Databricks' home turf. Delta Lake with time-travel for 7-year regulatory archives, Z-order for fast BSP/SARB examination queries, Unity Catalog for governance &mdash; there is no better platform.</p>
+    <ul>
+      <li>STR/CTR canonical views: SQL on Delta Lake Gold &mdash; perfect</li>
+      <li>goAML reporting dataset: Spark batch producing regulatory XML &mdash; perfect</li>
+      <li>MIS / Board-level dashboards: AI/BI Dashboards on Gold &mdash; perfect</li>
+      <li>Rule replay against historical data: Delta time-travel + notebooks &mdash; perfect</li>
+    </ul>
+  </div>
+
+  <div class="item-card">
+    <h3>2. ML Model Training and Batch Scoring</h3>
+    <div class="confidence conf-10">Confidence: 10/10</div>
+    <ul>
+      <li>Fraud model training on historical transaction data &mdash; MLflow + Spark, excellent</li>
+      <li>CRR batch scoring &mdash; Spark notebook, excellent</li>
+      <li>TM typology feature engineering &mdash; Spark batch, excellent</li>
+      <li>Champion/challenger model comparison &mdash; MLflow experiment tracking, excellent</li>
+    </ul>
+  </div>
+
+  <div class="item-card">
+    <h3>3. AML Transaction Monitoring (Batch)</h3>
+    <div class="confidence conf-9">Confidence: 9/10</div>
+    <p>Overnight TM batch is a perfect Databricks workload: Spark SQL + notebooks on a schedule, Databricks Jobs for orchestration. Only risk is complexity if there are 50+ interdependent jobs.</p>
+  </div>
+
+  <div class="item-card">
+    <h3>4. Entity Resolution (Zingg.ai)</h3>
+    <div class="confidence conf-8">Confidence: 8/10 batch &middot; 0/10 real-time</div>
+    <p>Zingg.ai runs natively on Spark. Databricks is the right platform. The issue isn't Databricks &mdash; it's that Zingg is batch-only while onboarding needs real-time dedup.</p>
+  </div>
+
+  <div class="item-card">
+    <h3>5. Data Ingestion (Bronze)</h3>
+    <div class="confidence conf-8">Confidence: 8/10</div>
+    <p>Lakeflow Connect for ingesting from core banking (Mambu), LSEG Refinitiv, Darwinium, PSP. Depends on connector maturity for specific FinCrime sources.</p>
+  </div>
+
+  <!-- STRETCHED -->
+  <div class="zone-title stretched">Where Databricks is Being STRETCHED</div>
+
+  <div class="item-card">
+    <h3>6. Lakebase as the Feature Store for Real-Time Fraud</h3>
+    <div class="confidence conf-5">Confidence: 5/10 (current) &middot; 8/10 (with Online Feature Store)</div>
+    <p>Using Lakebase Silver as a low-latency feature store means fighting its serverless design: <code>pg_prewarm</code> + provisioned compute + disabled scale-to-zero.</p>
+    <div class="take">
+      <strong>Recommendation:</strong> Use <strong>Databricks Online Feature Store</strong> (online tables backed by DynamoDB/Cosmos) for the fraud hot path. Features computed in Databricks, governed by Unity Catalog, served from an optimized read path with guaranteed sub-5ms reads.
+    </div>
+  </div>
+
+  <div class="item-card">
+    <h3>7. Model Serving Endpoints for Real-Time Fraud</h3>
+    <div class="confidence conf-6">Confidence: 6/10</div>
+    <p>MSE for inference is fine. The problem is: <strong>who holds the HTTP connection?</strong></p>
+    <div class="warn-box">
+      The flow <code>Mobile &rarr; API Gateway &rarr; ??? &rarr; MSE &rarr; Lakebase &rarr; Brain &rarr; ???</code> needs a <strong>lightweight orchestration microservice</strong> (Python/Go) that Databricks doesn't provide. The deck doesn't acknowledge this gap.
+    </div>
+  </div>
+
+  <div class="item-card">
+    <h3>8. "The Brain" on Databricks</h3>
+    <div class="confidence conf-3">Confidence: 3/10</div>
+    <p>This is the weakest part of the architecture. The Brain on "Databricks provisioned compute" has no viable runtime:</p>
+    <ul>
+      <li><strong>Notebook?</strong> &mdash; Not for real-time HTTP request/response</li>
+      <li><strong>Long-running Spark job?</strong> &mdash; ~50ms overhead per task scheduling alone</li>
+      <li><strong>Python service on a cluster?</strong> &mdash; Anti-pattern; paying for Spark to run Flask</li>
+    </ul>
+    <div class="take">
+      <strong>Recommendation:</strong> The Brain should be a <strong>lightweight stateless FastAPI service</strong> (on K8s or Databricks Apps) that receives decisions from MSE/Flowable, applies threshold rules, writes audit to Lakebase, and calls external systems. This is a microservice &mdash; and that's OK.
+    </div>
+  </div>
+
+  <!-- WRONG TOOL -->
+  <div class="zone-title wrong">Where Databricks is the WRONG Tool</div>
+
+  <div class="item-card">
+    <h3>9. Flowable's Backend Database</h3>
+    <div class="confidence conf-2">Confidence: 2/10</div>
+    <p>Flowable writes heavily &mdash; every BPMN state transition, task assignment, and timer event. Lakebase (Neon-based) has:</p>
+    <ul>
+      <li>Higher write latency (WAL goes to remote safekeepers)</li>
+      <li>Ephemeral compute (cache lost on restart)</li>
+      <li>No logical replication support</li>
+    </ul>
+    <div class="take">
+      <strong>Recommendation:</strong> Run Flowable on <strong>standard managed Postgres</strong> (RDS/Cloud SQL). Flowable reads FCP data FROM Lakebase via JDBC, but its own internal state lives on a standard Postgres.
+    </div>
+  </div>
+
+  <div class="item-card">
+    <h3>10. Real-Time Event Routing / Message Bus</h3>
+    <div class="confidence conf-2">Confidence: 2/10</div>
+    <p>The architecture has no message bus, but needs async signals for:</p>
+    <ul>
+      <li>Brain &rarr; external systems (Mambu, PSP, INC) write-back</li>
+      <li>Screening list update &rarr; re-screening trigger</li>
+      <li>Batch job completion &rarr; Flowable case creation</li>
+    </ul>
+    <div class="take">
+      <strong>Recommendation:</strong> Add <strong>Kafka or EventBridge</strong> for event routing. Databricks "Zerobus" is too early for production FinCrime workloads.
+    </div>
+  </div>
+
+  <!-- Architecture Recommendation -->
+  <div class="arch-rec">
+    <h2>Recommended Architecture Adjustment</h2>
+    <div class="arch-cols">
+      <div class="arch-col keep">
+        <h3>KEEP ON DATABRICKS (its strengths)</h3>
+        <ul>
+          <li>Bronze &rarr; Silver &rarr; Gold medallion (Lakebase + Delta Lake)</li>
+          <li>All ML training + batch scoring (MLflow + Spark)</li>
+          <li>AML Transaction Monitoring batch (Spark Jobs)</li>
+          <li>Entity Resolution (Zingg.ai on Spark)</li>
+          <li>CRR scoring batch (Spark notebooks)</li>
+          <li>Feature engineering + feature store (Online Feature Store)</li>
+          <li>Gold regulatory reporting + audit (Delta Lake)</li>
+          <li>Unity Catalog governance (everything)</li>
+          <li>AI/BI dashboards</li>
+        </ul>
+      </div>
+      <div class="arch-col move">
+        <h3>MOVE OFF DATABRICKS (not its strengths)</h3>
+        <ul>
+          <li>Flowable backend DB &rarr; Standard managed Postgres</li>
+          <li>The Brain &rarr; Lightweight Python service (K8s or Databricks Apps)</li>
+          <li>Fraud orchestration &rarr; Thin API service calling MSE + Feature Store</li>
+          <li>Event routing &rarr; Kafka or EventBridge</li>
+          <li>Real-time feature serving &rarr; Databricks Online Tables (not raw Lakebase SQL)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Line -->
+  <div class="bottom-line">
+    <h2>The Bottom Line</h2>
+    <p>Databricks should be the <strong>data platform, ML platform, and governance platform</strong> &mdash; that's 70-80% of the FCP. But it should NOT be the <strong>application runtime</strong> for real-time orchestration, workflow engine hosting, or event routing.</p>
+    <p>The shift-left principle still holds: all data, all ML, all rules-as-data, all governance live in Databricks. But the thin orchestration layer (The Brain, event routing, Flowable runtime) should run on purpose-built infrastructure that reads from and writes to Databricks.</p>
+    <div class="key-msg">This isn't a compromise &mdash; it's the correct architecture. Even Databricks' own reference architectures for real-time applications show a lightweight serving layer in front of the platform.</div>
+  </div>
+
+</div>
+</body>
+</html>

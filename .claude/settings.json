@@ -15,6 +15,6 @@
     "github@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "playground@claude-plugins-official": true,
-    "cc10x@cc10x": true
+    "cc10x@cc10x": false
   }
 }

@@ -11,7 +11,8 @@
       "Bash(pgrep:*)",
       "Bash(curl:*)",
       "Bash(lsof -ti:8000 | xargs kill -9 2>/dev/null)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "WebFetch(domain:www.databricks.com)"
     ]
   }
 }

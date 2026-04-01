@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCP Architecture Evaluation — Gaps & Risks</title>
+<style>
+  :root {
+    --bg: #0f1923;
+    --card: #1a2a3a;
+    --card-hover: #1f3348;
+    --accent: #00d4aa;
+    --accent2: #ff6b6b;
+    --accent3: #ffa94d;
+    --text: #e0e6ed;
+    --text-muted: #8899aa;
+    --border: #2a3f55;
+    --high: #ff4757;
+    --medium: #ffa94d;
+    --low: #00d4aa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+  .hero {
+    background: linear-gradient(135deg, #0a1628 0%, #1a2a3a 50%, #0d2137 100%);
+    padding: 80px 60px;
+    border-bottom: 3px solid var(--accent);
+  }
+  .hero h1 {
+    font-size: 2.8em;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .hero .subtitle {
+    font-size: 1.2em;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .hero .meta {
+    margin-top: 20px;
+    color: var(--text-muted);
+    font-size: 0.9em;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 60px; }
+
+  .section-title {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #fff;
+    margin: 50px 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+  .section-intro {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    font-size: 1.05em;
+  }
+
+  .risk-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 30px 35px;
+    margin-bottom: 24px;
+    border-left: 5px solid var(--accent2);
+    transition: background 0.2s;
+  }
+  .risk-card:hover { background: var(--card-hover); }
+  .risk-card h3 {
+    font-size: 1.3em;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .risk-card h3 .num {
+    color: var(--accent2);
+    margin-right: 8px;
+  }
+  .risk-card p { margin-bottom: 12px; }
+  .risk-card strong { color: #fff; }
+  .risk-card .highlight {
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 0.95em;
+  }
+  .risk-card .recommendation {
+    background: rgba(0, 212, 170, 0.1);
+    border: 1px solid rgba(0, 212, 170, 0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 0.95em;
+  }
+  .risk-card ul { padding-left: 20px; margin: 10px 0; }
+  .risk-card li { margin-bottom: 6px; }
+
+  .question-section {
+    margin-top: 60px;
+  }
+  .question-group {
+    margin-bottom: 40px;
+  }
+  .question-group h3 {
+    font-size: 1.2em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .question {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .question .qnum {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    flex-shrink: 0;
+  }
+  .question .qtext { flex: 1; }
+  .question .qtext strong { color: #fff; }
+
+  .bottom-line {
+    background: linear-gradient(135deg, #1a2a3a, #0d2137);
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 60px 0;
+  }
+  .bottom-line h2 {
+    font-size: 1.6em;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .bottom-line ol {
+    padding-left: 24px;
+  }
+  .bottom-line li {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+  }
+  .bottom-line .verdict {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 1.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .nav-links a {
+    background: var(--card);
+    color: var(--accent);
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .works-well {
+    background: rgba(0, 212, 170, 0.08);
+    border: 1px solid rgba(0, 212, 170, 0.25);
+    border-radius: 12px;
+    padding: 24px 30px;
+    margin-bottom: 30px;
+  }
+  .works-well p { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>FCP Architecture Evaluation</h1>
+  <div class="subtitle">Can the Financial Crime Platform Run End-to-End on Databricks?</div>
+  <div class="meta">GoTyme Bank / GoTymeX &middot; Architecture Review &middot; March 2026</div>
+  <div class="nav-links">
+    <a href="FCP_Architecture_Flow_Diagram.html">Flow Diagrams & Latency</a>
+    <a href="FCP_Databricks_Review.html">Databricks Fit Review</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <h2 class="section-title">What Works Well</h2>
+  <div class="works-well">
+    <p>The <strong>shift-left principle</strong> is sound. Keeping logic at the data layer eliminates the #1 problem in FinCrime platforms: data movement creating inconsistency and latency. The <strong>medallion architecture</strong> (Bronze&rarr;Silver&rarr;Gold) is a proven pattern. <strong>Unity Catalog</strong> as the single governance plane is the right call for dual-jurisdiction (PH/SA).</p>
+  </div>
+
+  <h2 class="section-title">Critical Gaps & Risks</h2>
+  <p class="section-intro">8 architectural risks identified, ranked by severity and impact on production readiness.</p>
+
+  <div class="risk-card">
+    <h3><span class="num">#1</span> The Sub-50ms Fraud Path &mdash; Highest Risk Item</h3>
+    <p><strong>The claim:</strong> Transaction &rarr; API Gateway &rarr; Model Serving Endpoint &rarr; Lakebase Silver (feature lookup) &rarr; Brain &rarr; Response in &lt;50ms.</p>
+    <p><strong>The reality:</strong> This chain has at minimum <strong>4 network hops</strong>:</p>
+    <ul>
+      <li>API Gateway &rarr; MSE: ~5-10ms (network + cold routing)</li>
+      <li>MSE &rarr; Lakebase Silver (feature lookup via SQL): <strong>This is the bottleneck.</strong> Realistic P50 is 3-8ms, but P99 under load could be 20-40ms</li>
+      <li>MSE inference: ~2-5ms (provisioned)</li>
+      <li>MSE &rarr; Brain &rarr; response: ~5-10ms</li>
+    </ul>
+    <div class="highlight">
+      <strong>Total realistic P99: 40-80ms</strong>, not sub-50ms. The feature lookup from Lakebase is not sub-10ms at P99 &mdash; especially under concurrent fraud scoring load.
+    </div>
+    <div class="recommendation">
+      <strong>Question for the team:</strong> Has anyone benchmarked Lakebase read latency at P99 under concurrent load? Redis/Memcached as a feature cache would be more realistic for sub-50ms &mdash; but that breaks the "no data movement" principle.
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#2</span> Lakebase as Both OLTP and Feature Store &mdash; Architecture Tension</h3>
+    <p>The doc uses Lakebase for: Bronze raw ingest (write-heavy), Silver operational tables (read/write), feature store for real-time fraud scoring (read-heavy, latency-critical), Flowable's backend database, and PuppyGraph source.</p>
+    <div class="highlight">
+      <strong>Risk:</strong> These are fundamentally different workload profiles. A burst of TM batch writes to Silver can degrade the fraud feature lookup P99 at the worst possible time.
+    </div>
+    <div class="recommendation">
+      <strong>Recommendation:</strong> Separate Lakebase projects for: <strong>Hot path</strong> (fraud features, provisioned), <strong>Operational</strong> (Flowable, case mgmt), <strong>Ingest</strong> (Bronze writes).
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#3</span> "The Brain" &mdash; Insufficiently Defined</h3>
+    <p>The Brain is described as the single decisioning core, but the doc doesn't specify:</p>
+    <ul>
+      <li><strong>What is it actually?</strong> A Databricks notebook? A long-running Spark job? A Python service? A stored procedure?</li>
+      <li><strong>How does it receive real-time triggers?</strong> Databricks doesn't have a native event-driven invocation mechanism for notebooks.</li>
+      <li><strong>How does it write back to Mambu/PSP/INC?</strong> These are synchronous write-backs to external core banking systems.</li>
+    </ul>
+    <div class="highlight">
+      <strong>This is the biggest architectural ambiguity in the entire deck.</strong>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#4</span> Flowable &harr; Lakebase Integration &mdash; Untested at Scale</h3>
+    <p>Flowable is traditionally deployed on standard PostgreSQL. Lakebase is Neon-based with ephemeral compute (cache lost on restart), higher write latency (WAL goes to safekeepers), and no support for some Postgres features (logical replication).</p>
+    <div class="highlight">
+      Flowable's internal schema is write-heavy. Flowable at scale on Neon-based Postgres is <strong>completely unproven territory</strong>. A single slow WAL flush could stall a BPMN process execution.
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#5</span> PuppyGraph Zero-Copy &mdash; Needs Validation</h3>
+    <p>"Zero-copy" on Lakebase means PuppyGraph issues SQL queries &mdash; it's not reading memory pages directly. Graph traversals (2nd/3rd degree) generate many sequential queries. At 25M customers with N-year history, the graph could have billions of edges.</p>
+    <div class="recommendation">
+      <strong>Question:</strong> What is PuppyGraph's actual query pattern against Lakebase? Is it caching graph topology in its own memory, or is every traversal hitting Postgres?
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#6</span> Zingg.ai Entity Resolution &mdash; Batch-Only</h3>
+    <p><strong>Onboarding is real-time</strong> &mdash; a new customer needs a <code>party_id</code> before CDD can start. If Zingg.ai is batch (hourly/daily), there's a window where a new customer exists without deduplication.</p>
+    <div class="highlight">
+      During that window, sanctions screening runs against an unresolved entity &mdash; potentially a <strong>false negative</strong> (regulatory violation).
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#7</span> Dual Jurisdiction Data Residency &mdash; Not Addressed</h3>
+    <ul>
+      <li>Where does data physically reside? One Databricks workspace or two?</li>
+      <li>Can PH customer data be processed in SA compute, or is there a data residency constraint?</li>
+      <li>Unity Catalog ABAC is "in Preview" &mdash; is Preview acceptable for a regulated FinCrime platform?</li>
+    </ul>
+  </div>
+
+  <div class="risk-card">
+    <h3><span class="num">#8</span> Gold Layer &mdash; Delta Lake vs Lakebase Confusion</h3>
+    <p>Bronze/Silver are PostgreSQL in Lakebase, Gold is Delta Lake. But how does data move from Silver to Gold? That's ETL &mdash; the very thing shift-left is supposed to eliminate.</p>
+    <div class="recommendation">
+      <strong>Questions:</strong> Who runs this ETL? On what schedule? During the ETL window, Gold is stale &mdash; meaning regulatory reporting views and the ML feature store are behind.
+    </div>
+  </div>
+
+  <!-- Questions Section -->
+  <div class="question-section">
+    <h2 class="section-title">Questions for the Product Team / CTO</h2>
+    <p class="section-intro">18 clarification questions organized by category. These should be answered before committing to the architecture.</p>
+
+    <div class="question-group">
+      <h3>Architecture Fundamentals</h3>
+      <div class="question">
+        <div class="qnum">1</div>
+        <div class="qtext"><strong>"What exactly IS the Brain?"</strong> &mdash; Is it a long-running service, a Spark job, a notebook triggered by events, or a set of Lakebase stored procedures? How does it receive real-time triggers from MSE and respond synchronously?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">2</div>
+        <div class="qtext"><strong>"How does the real-time fraud path work synchronously end-to-end?"</strong> &mdash; Draw the sequence diagram with actual millisecond budgets per hop. Where does the HTTP request enter, and where does the approve/deny response exit?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">3</div>
+        <div class="qtext"><strong>"What happens when Lakebase compute restarts?"</strong> &mdash; pg_prewarm reloads the cache, but during the reload window fraud scoring hits cold storage. What's the degradation plan?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">4</div>
+        <div class="qtext"><strong>"How does data move from Silver to Gold?"</strong> &mdash; If it's an ETL job, what's the freshness guarantee? This directly affects regulatory reporting accuracy.</div>
+      </div>
+    </div>
+
+    <div class="question-group">
+      <h3>Latency & Scale</h3>
+      <div class="question">
+        <div class="qnum">5</div>
+        <div class="qtext"><strong>"Has anyone benchmarked Lakebase read latency at P99 under concurrent write load?"</strong> &mdash; Not P50, not in isolation. P99 while Bronze ingest, Flowable state writes, and fraud feature reads are all happening.</div>
+      </div>
+      <div class="question">
+        <div class="qnum">6</div>
+        <div class="qtext"><strong>"What is the target TPS for the fraud path?"</strong> &mdash; 25M customers, but how many transactions per second? 100 TPS is very different from 10,000 TPS.</div>
+      </div>
+      <div class="question">
+        <div class="qnum">7</div>
+        <div class="qtext"><strong>"What is the failover story?"</strong> &mdash; If Lakebase compute goes down, is there automatic failover? What's the RTO? Even 30 seconds of downtime means 30 seconds of unscored transactions.</div>
+      </div>
+    </div>
+
+    <div class="question-group">
+      <h3>Component Choices</h3>
+      <div class="question">
+        <div class="qnum">8</div>
+        <div class="qtext"><strong>"Why Flowable and not Databricks Workflows?"</strong> &mdash; Flowable adds significant complexity. What does Flowable provide that Databricks Workflows + Delta Live Tables cannot?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">9</div>
+        <div class="qtext"><strong>"Why PuppyGraph and not GraphFrames (native Spark)?"</strong> &mdash; GraphFrames runs natively on Spark. Where specifically does PuppyGraph's real-time traversal justify the additional component?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">10</div>
+        <div class="qtext"><strong>"Why Superblocks for case UI?"</strong> &mdash; If Flowable Work already provides a case management UI, why add Superblocks? Two UX frameworks = two things to maintain.</div>
+      </div>
+      <div class="question">
+        <div class="qnum">11</div>
+        <div class="qtext"><strong>"What is Zingg.ai's real-time dedup story for onboarding?"</strong> &mdash; If batch, how long until a resolved party_id? Is there an interim deterministic match?</div>
+      </div>
+    </div>
+
+    <div class="question-group">
+      <h3>Regulatory & Governance</h3>
+      <div class="question">
+        <div class="qnum">12</div>
+        <div class="qtext"><strong>"Is Unity Catalog ABAC (Preview) acceptable for BSP/SARB?"</strong> &mdash; Preview features can change. What's the fallback?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">13</div>
+        <div class="qtext"><strong>"Who owns the 7-year audit trail retention policy?"</strong> &mdash; If someone runs VACUUM with a short retention, the audit trail is gone. What prevents this?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">14</div>
+        <div class="qtext"><strong>"How do you prove a rule change didn't retroactively affect past decisions?"</strong> &mdash; Is DMN versioning + Delta time-travel actually tested, or theoretical?</div>
+      </div>
+    </div>
+
+    <div class="question-group">
+      <h3>Missing from the Deck</h3>
+      <div class="question">
+        <div class="qnum">15</div>
+        <div class="qtext"><strong>"Where is the disaster recovery plan?"</strong> &mdash; The entire platform is on Databricks. What if the region goes down?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">16</div>
+        <div class="qtext"><strong>"Where is the data migration plan?"</strong> &mdash; The deck describes target state but not the path from current state.</div>
+      </div>
+      <div class="question">
+        <div class="qnum">17</div>
+        <div class="qtext"><strong>"What are the cost estimates?"</strong> &mdash; Provisioned Lakebase 24/7, autoscaling batch, MLflow MSE, PuppyGraph, Flowable infra. Has anyone modeled the monthly bill?</div>
+      </div>
+      <div class="question">
+        <div class="qnum">18</div>
+        <div class="qtext"><strong>"What is the team structure?"</strong> &mdash; Hafnia needed 10 people for a simpler use case. How many engineers does GoTyme need for FCP?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Line -->
+  <div class="bottom-line">
+    <h2>Bottom Line Assessment</h2>
+    <p>The architecture is <strong>ambitious and conceptually sound</strong> but has three critical unknowns that must be validated before committing:</p>
+    <ol>
+      <li><strong>The real-time fraud path latency</strong> &mdash; needs actual benchmarking, not theoretical estimates</li>
+      <li><strong>The Brain's runtime model</strong> &mdash; this is architecturally undefined and is the central decision component</li>
+      <li><strong>Flowable on Lakebase at scale</strong> &mdash; completely unproven combination</li>
+    </ol>
+    <div class="verdict">Recommendation: Focused PoC on the fraud path (items 1+2) before investing in the full platform build. If sub-50ms can't be met with Lakebase alone, the architecture needs a caching layer &mdash; which changes the entire shift-left premise.</div>
+  </div>
+
+</div>
+</body>
+</html>
