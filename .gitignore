@@ -9,3 +9,5 @@
 
 *.mp4
 **/*.mp4
+**/FCP_*.pdf
+**/src_not_in_git/
